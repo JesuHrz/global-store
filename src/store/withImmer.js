@@ -1,10 +1,14 @@
-export const createStore = (initialState) => {
-  let state = initialState
-  const getState = () => state
+const { produce } = window.immer
+
+export const createStore = (initialState = {}) => {
   const listeners = new Set()
+  const _inmutableState = produce((draft) => ({ ...initialState, ...draft }))
+  let state = _inmutableState(initialState)
+
+  const getState = () => state
 
   const setState = (fn) => {
-    state = fn(state)
+    state = _inmutableState(fn({ ...state }))
 
     listeners.forEach((listener) => {
       if (listener.LISTENER) {
